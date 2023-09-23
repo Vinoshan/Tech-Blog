@@ -1,63 +1,63 @@
-const express = require('express');
-const router = express.Router();
-const { Post } = require('../../models');
-const withAuth = require('../../utils/auth');
+const router = require('express').Router();
+const { User } = require('../../models');
 
-// Create a new post (POST /api/posts)
-router.post('/', withAuth, async (req, res) => {
+// Create a new user
+router.post('/', async (req, res) => {
   try {
-    // Create a new post using data from the request body and the authenticated user's ID
-    const newPost = await Post.create({
-      ...req.body,
-      userId: req.session.user_id,
-    });
+    const userData = await User.create(req.body);
 
-    // Respond with a JSON representation of the newly created post
-    res.status(200).json(newPost);
+    req.session.save(() => {
+      req.session.user_id = userData.id;
+      req.session.logged_in = true;
+
+      res.status(200).json(userData);
+    });
   } catch (err) {
-    // Handle any errors and send a 400 Bad Request response with the error information
     res.status(400).json(err);
   }
 });
 
-// Delete a post by ID (DELETE /api/posts/:id)
-router.delete("/:id", async (req, res) => {
+// Login a user and verify their password
+router.post('/login', async (req, res) => {
   try {
-    // Attempt to delete the post with the specified ID
-    const deletePostData = await Post.destroy({
-      where: {
-        id: req.params.id,
-      },
+    const userData = await User.findOne({ where: { email: req.body.email } });
+
+    if (!userData) {
+      res
+        .status(400)
+        .json({ message: 'Incorrect email or password, please try again' });
+      return;
+    }
+
+    const validPassword = await userData.checkPassword(req.body.password);
+
+    if (!validPassword) {
+      res
+        .status(400)
+        .json({ message: 'Incorrect email or password, please try again' });
+      return;
+    }
+
+    req.session.save(() => {
+      req.session.user_id = userData.id;
+      req.session.logged_in = true;
+
+      res.json({ user: userData, message: 'You are now logged in!' });
     });
 
-    // Respond with a success status and information about the deleted post
-    return res.status(200).json(deletePostData);
   } catch (err) {
-    // Handle any errors and send a 500 Internal Server Error response with the error information
-    console.log(err);
-    return res.status(500).json(err);
+    res.status(400).json(err);
   }
 });
 
-// Update a post by ID (PUT /api/posts/:id)
-router.put("/:id", withAuth, async (req, res) => {
-  try {
-    // Attempt to update the post with the specified ID using data from the request body
-    const updateResult = await Post.update(
-      req.body,
-      {
-        where: {
-          id: req.params.id,
-        },
-      }
-    );
-
-    // Respond with a success status and information about the updated post
-    return res.status(200).json(updateResult);
-  } catch (err) {
-    // Handle any errors and send a 500 Internal Server Error response with the error information
-    console.log(err);
-    return res.status(500).json(err);
+// Logout a user
+router.post('/logout', (req, res) => {
+  if (req.session.logged_in) {
+    req.session.destroy(() => {
+      res.status(204).end();
+    });
+  } else {
+    res.status(404).end();
   }
 });
 
