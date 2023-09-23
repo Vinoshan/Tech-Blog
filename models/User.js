@@ -2,10 +2,11 @@ const { Model, DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
 const sequelize = require('../config/connection');
 
+// Create our User model
 class User extends Model {
-  // Set up method to run on instance data (per user) to check password
-  async checkPassword(loginPw) {
-    return await bcrypt.compare(loginPw, this.password);
+  // Method to check if a provided password matches the hashed password stored in the database
+  checkPassword(loginPw) {
+    return bcrypt.compareSync(loginPw, this.password);
   }
 }
 
@@ -15,11 +16,11 @@ User.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
     username: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
     email: {
       type: DataTypes.STRING,
@@ -33,30 +34,29 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [4],
-      },
-    },
+        len: [4] // Minimum password length
+      }
+    }
   },
   {
     hooks: {
-      // Set up beforeCreate and beforeUpdate lifecycle "hook" functionality
+      // Hash the password before creating a new user
       beforeCreate: async (newUserData) => {
-        newUserData.password = await bcrypt.hash(newUserData.password, 10);
+        newUserData.password = await bcrypt.hash(newUserData.password, 10); // Hash the password with a salt of 10 rounds
         return newUserData;
       },
+      // Hash the password before updating user information
       beforeUpdate: async (updatedUserData) => {
-        if (updatedUserData.password) {
-          updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
-        }
+        updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
         return updatedUserData;
-      },
+      }
     },
     sequelize,
-    timestamps: false,
-    freezeTableName: true,
-    underscored: true,
-    modelName: 'user',
-  }
+    timestamps: false, // Disable timestamps
+    freezeTableName: true, // Prevent pluralization of the table name
+    underscored: true, // Use underscores instead of camelCase for column names
+    modelName: 'user' // Set the model name
+  } 
 );
 
 module.exports = User;
