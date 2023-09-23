@@ -2,9 +2,10 @@ const router = require('express').Router();
 const { Post, User, Comment } = require('../models');
 const withAuth = require('../utils/auth');
 
-// Render the homepage
+
 router.get('/', async (req, res) => {
   try {
+    // Get all posts and JOIN with user data
     const postData = await Post.findAll({
       include: [
         {
@@ -14,15 +15,19 @@ router.get('/', async (req, res) => {
       ],
     });
 
+    // Serialize data so the template can read it
     const posts = postData.map((post) => post.get({ plain: true }));
 
-    res.render('homepage', { posts, logged_in: req.session.logged_in });
+    // Pass serialized data and session flag into template
+    res.render('homepage', { 
+        posts, 
+      logged_in: req.session.logged_in 
+    });
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// Render a specific post and its comments
 router.get('/post/:id', withAuth, async (req, res) => {
   try {
     const postData = await Post.findByPk(req.params.id, {
@@ -33,6 +38,7 @@ router.get('/post/:id', withAuth, async (req, res) => {
         },
         {
           model: Comment,
+          //join of joined data
           include: [
             {
               model: User,
@@ -44,24 +50,23 @@ router.get('/post/:id', withAuth, async (req, res) => {
     });
 
     const post = postData.get({ plain: true });
+    post.comments = post.comments.map(comment => ({...comment, canDelete: comment.userId == req.session.user_id}))
 
-    // Add a canDelete property to comments for conditional rendering
-    post.comments = post.comments.map(comment => ({
-      ...comment,
-      canDelete: comment.userId === req.session.user_id
-    }));
-
-    res.render('post-comment', {
-      ...post,
-      logged_in: true,
-      postData: post,
-    });
+    if (post) {
+      res.render('post-comment', {
+        ...post,
+        logged_in: true,
+        postData: post,
+      });
+    } else {
+      res.redirect("/");
+    }
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// Render the update page for a post
+// Create a new route for updating a post
 router.get('/update/:id', withAuth, async (req, res) => {
   try {
     const postData = await Post.findByPk(req.params.id, {
@@ -75,23 +80,26 @@ router.get('/update/:id', withAuth, async (req, res) => {
 
     if (!postData) {
       res.redirect("/dashboard");
-      return;
     }
+      const post = postData.get({ plain: true });
 
-    const post = postData.get({ plain: true });
-
-    res.render('update', {
-      post,
-      logged_in: true,
+    // Send the post data as JSON to the client
+    res.render('update',{
+      post, 
+      logged_in: true, 
+      id: req.body.id,
     });
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// Render the user dashboard
+
+
+// Use withAuth middleware to prevent access to route
 router.get('/dashboard', withAuth, async (req, res) => {
   try {
+    // Find the logged in user based on the session ID
     const userData = await User.findByPk(req.session.user_id, {
       attributes: { exclude: ['password'] },
       include: [{ model: Post }],
@@ -108,13 +116,14 @@ router.get('/dashboard', withAuth, async (req, res) => {
   }
 });
 
-// Render the login page
 router.get('/login', (req, res) => {
+  // If the user is already logged in, redirect the request to another route
   if (req.session.logged_in) {
     res.redirect('/dashboard');
-  } else {
-    res.render('login');
+    return;
   }
+
+  res.render('login');
 });
 
 module.exports = router;
