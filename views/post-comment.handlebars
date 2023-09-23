@@ -1,0 +1,26 @@
+<div class="text-left">
+    <h2 class="text-center">{{title}}</h2>
+    <h4>{{body}}</h4>
+    <p>Created by {{user.username}} on {{format_date date_created}}</p>
+    <hr>
+    <br>
+    <h4>Comments:</h4>
+    {{#each comments as |comment|}}
+    <h4>{{comment.body}}</h4>
+    <p>Written by {{comment.user.username}} on {{format_date comment.date_created}}</p>
+    <hr>
+    {{/each}}
+
+    <form class="form new-comment-form">
+        <div class="form-group">
+            <label for="comment-desc">Add new comment:</label>
+            <textarea class="form-input" id="comment-desc" name="comment-desc"></textarea>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+    </form>
+
+</div>
+
+<script src="/js/post-comment.js"></script>
