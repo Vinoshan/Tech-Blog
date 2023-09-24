@@ -11,6 +11,7 @@ This is a CMS-style blog site built for developers who want to publish articles,
   - [Usage](#usage)
   - [Features](#features)
   - [Screenshot](#screenshot)
+  - [Deployed App](#deployed-app)
   - [Technologies Used](#technologies-used)
   - [Contributing](#contributing)
   - [License](#license)
@@ -55,6 +56,14 @@ To run this application locally or deploy it to your server, follow these steps:
 - Session management with automatic logout after a period of inactivity.
 
 ## Screenshot
+![Screenshot of Website](/img/home.jpeg "Home")
+![Screenshot of Website](/img/Login.jpeg "Login")
+![Screenshot of Website](/img/DashboardWithoutUserPost.jpeg "Dashboard Without User Post")
+![Screenshot of Website](/img/DashboardwithUserPost.jpeg "Dashboard with User Post")
+![Screenshot of Website](/img/Comment.jpeg "Comment")
+## Deployed App
+
+You can access the deployed app on Heroku: [TechByte](https://techbyte-blog-a00f6afd0d28.herokuapp.com/)
 
 ## Technologies Used
 - Node.js
