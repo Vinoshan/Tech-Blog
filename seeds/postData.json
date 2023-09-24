@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Implementing Authentication in a Node.js App with Passport.js",
+    "body": "Learn how to add user authentication to your Node.js application using the Passport.js library."
+  },
+  {
+    "title": "Optimizing Database Queries for Better Performance",
+    "body": "Explore techniques for optimizing SQL queries to improve the performance of your database-driven applications."
+  },
+  {
+    "title": "Getting Started with Python Web Scraping",
+    "body": "Discover the basics of web scraping in Python and how to extract data from websites for various purposes."
+  },
+  {
+    "title": "Containerization with Docker: A Comprehensive Guide",
+    "body": "Dive into the world of Docker containers and learn how to containerize your applications for easier deployment and scalability."
+  },
+  {
+    "title": "Scaling Your Application Infrastructure with Kubernetes",
+    "body": "Explore how Kubernetes can help you manage and scale your containerized applications effectively in a distributed environment."
+  }
+]
